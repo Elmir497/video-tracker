@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Training Video Tracker</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3352;
+    --accent: #6c63ff;
+    --warn: #f5a623;
+    --danger: #ff5c5c;
+    --success: #4caf7d;
+    --text: #e8eaf6;
+    --muted: #8b91b6;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 0 0 80px; }
+
+  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 18px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  header h1 { font-size: 1.15rem; font-weight: 700; }
+  header h1 span { color: var(--accent); }
+  .header-meta { font-size: .78rem; color: var(--muted); margin-top: 2px; }
+  .today-badge { background: var(--accent); color: white; padding: 4px 12px; border-radius: 20px; font-size: .75rem; font-weight: 600; }
+
+  main { max-width: 1000px; margin: 0 auto; padding: 28px 20px; }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; text-align: center; }
+  .stat-card .num { font-size: 1.9rem; font-weight: 800; }
+  .stat-card .lbl { font-size: .72rem; color: var(--muted); margin-top: 3px; text-transform: uppercase; letter-spacing: .5px; }
+  .c-published .num { color: var(--success); }
+  .c-active .num { color: var(--warn); }
+  .c-blocked .num { color: var(--danger); }
+  .c-total .num { color: var(--accent); }
+
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+  .section-header h2 { font-size: 1rem; font-weight: 600; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .btn { background: var(--accent); color: white; border: none; border-radius: 8px; padding: 8px 16px; font-size: .82rem; font-weight: 600; cursor: pointer; transition: opacity .15s; white-space: nowrap; }
+  .btn:hover { opacity: .85; }
+  .btn-sm { padding: 4px 10px; font-size: .72rem; border-radius: 6px; }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); opacity: 1; }
+  .btn-danger { border-color: var(--danger); color: var(--danger); }
+  .btn-danger:hover { background: rgba(255,92,92,.1); border-color: var(--danger); color: var(--danger); }
+
+  /* Sprint card */
+  .sprint-list { display: flex; flex-direction: column; gap: 14px; }
+  .sprint-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; position: relative; overflow: hidden; transition: border-color .2s; }
+  .sprint-card.st-active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 4px 24px rgba(108,99,255,.12); }
+  .sprint-card.st-overdue { border-color: var(--danger); }
+  .sprint-card.st-done { opacity: .55; }
+  .card-badge { position: absolute; top: 0; right: 0; font-size: .62rem; font-weight: 700; padding: 3px 11px; border-bottom-left-radius: 8px; letter-spacing: 1px; color: white; }
+  .badge-active { background: var(--accent); }
+  .badge-overdue { background: var(--danger); }
+  .badge-done { background: var(--success); }
+
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; gap: 12px; }
+  .card-meta { flex: 1; min-width: 0; }
+  .sprint-num { font-size: .68rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 3px; }
+  .sprint-title { font-size: 1rem; font-weight: 600; outline: none; }
+  .sprint-title:focus { border-bottom: 1px dashed var(--accent); }
+  .card-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+  /* Pipeline */
+  .pipeline { display: flex; align-items: stretch; gap: 0; margin-bottom: 14px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+  .stage { flex: 1; padding: 10px 10px 8px; display: flex; flex-direction: column; align-items: center; gap: 5px; position: relative; background: var(--surface2); cursor: pointer; transition: background .15s; border-right: 1px solid var(--border); min-width: 0; user-select: none; }
+  .stage:last-child { border-right: none; }
+  .stage:hover { background: #2a2e42; }
+  .stage.optional-hidden { display: none; }
+  .stage-icon { font-size: 1rem; line-height: 1; }
+  .stage-name { font-size: .62rem; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; text-align: center; line-height: 1.2; }
+  .stage-status { font-size: .65rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; margin-top: 2px; white-space: nowrap; }
+  .ss-todo { background: rgba(139,145,182,.13); color: var(--muted); }
+  .ss-progress { background: rgba(245,166,35,.15); color: var(--warn); }
+  .ss-done { background: rgba(76,175,125,.15); color: var(--success); }
+  .ss-na { background: rgba(139,145,182,.08); color: rgba(139,145,182,.4); font-style: italic; }
+  .stage::after { content: '›'; position: absolute; right: -8px; top: 50%; transform: translateY(-50%); color: var(--border); font-size: .9rem; z-index: 1; pointer-events: none; }
+  .stage:last-child::after { display: none; }
+
+  .progress-bar { height: 4px; background: var(--surface2); border-radius: 4px; margin-bottom: 12px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 4px; transition: width .3s; }
+
+  .screen-rec-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: .78rem; color: var(--muted); }
+  .toggle-wrap { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  .toggle { width: 32px; height: 18px; background: var(--surface2); border-radius: 9px; border: 1px solid var(--border); position: relative; transition: background .2s; flex-shrink: 0; }
+  .toggle.on { background: var(--accent); border-color: var(--accent); }
+  .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; background: white; border-radius: 50%; transition: left .2s; }
+  .toggle.on::after { left: 16px; }
+
+  .due-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
+  .due-item { display: flex; align-items: center; gap: 6px; font-size: .78rem; }
+  .due-label { color: var(--muted); }
+  .due-date { font-weight: 600; }
+  .due-date.overdue { color: var(--danger); }
+  .due-date.soon { color: var(--warn); }
+  .due-date.done-date { color: var(--success); text-decoration: line-through; }
+
+  /* ── Scripts & Assets drawer ── */
+  .assets-toggle {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 14px; cursor: pointer; font-size: .8rem; font-weight: 600;
+    color: var(--muted); transition: color .15s, border-color .15s; user-select: none;
+    margin-bottom: 0;
+  }
+  .assets-toggle:hover { color: var(--text); border-color: var(--accent); }
+  .assets-toggle.open { border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom-color: transparent; color: var(--text); border-color: var(--accent); }
+  .assets-toggle .chevron { transition: transform .2s; font-style: normal; }
+  .assets-toggle.open .chevron { transform: rotate(180deg); }
+
+  .assets-drawer {
+    display: none; border: 1px solid var(--accent); border-top: none;
+    border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;
+    overflow: hidden; margin-bottom: 10px;
+  }
+  .assets-drawer.open { display: block; }
+
+  /* Tabs */
+  .asset-tabs { display: flex; background: var(--surface2); border-bottom: 1px solid var(--border); }
+  .asset-tab {
+    padding: 8px 16px; font-size: .78rem; font-weight: 600; cursor: pointer;
+    color: var(--muted); border-bottom: 2px solid transparent; transition: color .15s, border-color .15s;
+    user-select: none; white-space: nowrap;
+  }
+  .asset-tab:hover { color: var(--text); }
+  .asset-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .asset-tab.has-content::after { content: '●'; font-size: .45rem; margin-left: 5px; vertical-align: middle; color: var(--success); }
+
+  .asset-panel { display: none; padding: 14px; background: #161927; }
+  .asset-panel.active { display: block; }
+
+  /* Script textarea */
+  .script-area {
+    width: 100%; min-height: 160px; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px; color: var(--text); font-family: inherit;
+    font-size: .82rem; line-height: 1.6; resize: vertical; outline: none;
+    transition: border-color .15s;
+  }
+  .script-area:focus { border-color: var(--accent); }
+  .script-area::placeholder { color: rgba(139,145,182,.4); }
+  .script-meta { font-size: .7rem; color: var(--muted); margin-bottom: 8px; }
+
+  /* Recording link */
+  .rec-link-row { display: flex; gap: 8px; align-items: center; }
+  .rec-link-input {
+    flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 9px 12px; color: var(--text); font-family: inherit; font-size: .85rem;
+    outline: none; transition: border-color .15s;
+  }
+  .rec-link-input:focus { border-color: var(--accent); }
+  .rec-link-input::placeholder { color: rgba(139,145,182,.4); }
+  .rec-open-btn {
+    background: rgba(108,99,255,.15); border: 1px solid var(--accent); color: var(--accent);
+    border-radius: 8px; padding: 9px 14px; font-size: .8rem; font-weight: 600;
+    cursor: pointer; white-space: nowrap; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+    transition: background .15s;
+  }
+  .rec-open-btn:hover { background: rgba(108,99,255,.28); }
+  .rec-open-btn.disabled { opacity: .35; pointer-events: none; }
+  .rec-hint { font-size: .72rem; color: var(--muted); margin-top: 8px; }
+
+  /* Notes */
+  .sprint-notes { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 8px; }
+  .sprint-notes textarea { width: 100%; background: transparent; border: none; color: var(--muted); font-size: .78rem; font-family: inherit; resize: none; outline: none; line-height: 1.5; min-height: 32px; }
+  .sprint-notes textarea::placeholder { color: rgba(139,145,182,.4); }
+
+  .timeline-connector { width: 2px; height: 14px; background: var(--border); margin-left: 30px; }
+
+  /* Modal */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.72); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 26px; width: 100%; max-width: 500px; margin: 20px; max-height: 90vh; overflow-y: auto; }
+  .modal h3 { font-size: 1.05rem; margin-bottom: 18px; }
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: .75rem; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: .4px; }
+  .form-group input, .form-group textarea, .form-group select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 9px 11px; color: var(--text); font-family: inherit; font-size: .88rem; outline: none; transition: border-color .15s; }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--accent); }
+  .form-group textarea { resize: vertical; min-height: 70px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-section { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin: 18px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  .checkbox-row { display: flex; align-items: center; gap: 8px; font-size: .85rem; }
+  .checkbox-row input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+
+  .pipeline-legend { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: .75rem; color: var(--muted); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .empty .icon { font-size: 2.5rem; margin-bottom: 14px; }
+  .empty p { font-size: .88rem; margin-bottom: 18px; }
+
+  .cycle-info { background: linear-gradient(135deg, rgba(108,99,255,.08), rgba(0,212,170,.06)); border: 1px solid rgba(108,99,255,.25); border-radius: 12px; padding: 14px 18px; margin-bottom: 22px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .cycle-info .ci-label { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
+  .cycle-info .ci-value { font-size: .88rem; font-weight: 600; margin-top: 2px; }
+  .ci-divider { width: 1px; height: 34px; background: var(--border); }
+  .ci-pill { display: inline-flex; align-items: center; gap: 4px; font-size: .72rem; font-weight: 600; padding: 2px 9px; border-radius: 20px; }
+  .ci-pill-draft { background: rgba(108,99,255,.18); color: #a09aff; }
+  .ci-pill-review { background: rgba(245,166,35,.15); color: var(--warn); }
+  .ci-pill-rec { background: rgba(255,92,92,.12); color: #ff8a8a; }
+  .ci-pill-prod { background: rgba(0,212,170,.12); color: #00d4aa; }
+
+  /* Settings / report */
+  .settings-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 6px 12px; font-size: .8rem; cursor: pointer; transition: color .15s, border-color .15s; }
+  .settings-btn:hover { color: var(--text); border-color: var(--accent); }
+  .btn-report { background: rgba(76,175,125,.15); border: 1px solid var(--success); color: var(--success); }
+  .btn-report:hover { background: rgba(76,175,125,.28); opacity: 1; }
+
+  /* Project tabs */
+  .project-tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: 10px; padding: 4px; }
+  .project-tab { padding: 6px 18px; border-radius: 7px; font-size: .82rem; font-weight: 600; cursor: pointer; color: var(--muted); border: none; background: transparent; transition: background .15s, color .15s; white-space: nowrap; }
+  .project-tab.active { background: var(--accent); color: white; }
+  .project-tab:not(.active):hover { color: var(--text); }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>AI Training Video <span>Tracker</span></h1>
+    <div class="header-meta">2-week rolling production pipeline</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    <div class="project-tabs">
+      <button class="project-tab active" id="tab-ai" onclick="switchProject('ai')">Onboarding Videos</button>
+      <button class="project-tab" id="tab-invoice" onclick="switchProject('invoice')">Invoice Delivery</button>
+    </div>
+    <button class="settings-btn" onclick="openSettings()">⚙ Settings</button>
+    <div class="today-badge" id="todayBadge"></div>
+  </div>
+</header>
+
+<main>
+  <div id="projectHeading" style="margin-bottom:16px">
+    <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Active Project</div>
+    <div style="font-size:1.1rem;font-weight:700" id="projectTitle">AI Tools Videos</div>
+  </div>
+  <div class="cycle-info">
+    <div>
+      <div class="ci-label">Cadence</div>
+      <div class="ci-value">Every 2 weeks</div>
+    </div>
+    <div class="ci-divider"></div>
+    <div>
+      <div class="ci-label">Pipeline stages</div>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:5px;">
+        <span class="ci-pill ci-pill-draft">✍️ AI Draft</span>
+        <span style="color:var(--muted);font-size:.75rem">→</span>
+        <span class="ci-pill ci-pill-review">🔍 Expert Review</span>
+        <span style="color:var(--muted);font-size:.75rem">→</span>
+        <span class="ci-pill ci-pill-review">✅ Validated</span>
+        <span style="color:var(--muted);font-size:.75rem">→</span>
+        <span class="ci-pill ci-pill-rec">🎥 Screen Rec</span>
+        <span style="color:var(--muted);font-size:.75rem">→</span>
+        <span class="ci-pill ci-pill-prod">🎬 Production</span>
+        <span style="color:var(--muted);font-size:.75rem">→</span>
+        <span class="ci-pill ci-pill-prod">🚀 Published</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card c-published"><div class="num" id="statPublished">0</div><div class="lbl">Published</div></div>
+    <div class="stat-card c-active"><div class="num" id="statActive">0</div><div class="lbl">In Progress</div></div>
+    <div class="stat-card c-blocked"><div class="num" id="statBlocked">0</div><div class="lbl">Overdue</div></div>
+    <div class="stat-card c-total"><div class="num" id="statTotal">0</div><div class="lbl">Total Sprints</div></div>
+  </div>
+
+  <div class="section-header">
+    <h2>Production Sprints</h2>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="exportCSV()">↓ Export CSV</button>
+      <button class="btn btn-outline" onclick="exportHTML()">↓ Share HTML</button>
+      <button class="btn btn-outline" onclick="openDashboard()" style="border-color:#a09aff;color:#a09aff;">Progress Snapshot</button>
+      <button class="btn" onclick="openModal()">+ Add Sprint</button>
+    </div>
+  </div>
+
+  <div class="pipeline-legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--muted)"></div> To Do</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--warn)"></div> In Progress</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--success)"></div> Done</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--danger)"></div> Overdue</div>
+    <div class="legend-item" style="margin-left:4px;font-style:italic">Click any stage to cycle its status</div>
+  </div>
+
+  <div class="sprint-list" id="sprintList"></div>
+</main>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3 id="modalTitle">Add New Sprint</h3>
+    <div class="form-group">
+      <label>Video Topic / Title</label>
+      <input type="text" id="fTitle" placeholder="e.g. Introduction to Prompt Engineering">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Script Due Date</label>
+        <input type="date" id="fScriptDate">
+      </div>
+      <div class="form-group">
+        <label>Video Publish Date</label>
+        <input type="date" id="fVideoDate">
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="checkbox-row">
+        <input type="checkbox" id="fNeedsRec">
+        <label for="fNeedsRec" style="text-transform:none;letter-spacing:0;margin:0;font-size:.88rem;color:var(--text);cursor:pointer">Screen recording required for this video</label>
+      </div>
+    </div>
+    <div class="form-section">Stage Statuses</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>✍️ AI Draft</label>
+        <select id="fDraft"><option value="todo">To Do</option><option value="progress">In Progress</option><option value="done">Done ✓</option></select>
+      </div>
+      <div class="form-group">
+        <label>🔍 Expert Review</label>
+        <select id="fReview"><option value="todo">To Do</option><option value="progress">In Progress</option><option value="done">Done ✓</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>✅ Script Validated</label>
+        <select id="fValidated"><option value="todo">To Do</option><option value="progress">In Progress</option><option value="done">Done ✓</option></select>
+      </div>
+      <div class="form-group">
+        <label>🎥 Screen Recording</label>
+        <select id="fRec"><option value="todo">To Do</option><option value="progress">In Progress</option><option value="done">Done ✓</option><option value="na">N/A</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>🎬 Video Production</label>
+        <select id="fProduction"><option value="todo">To Do</option><option value="progress">In Progress</option><option value="done">Done ✓</option></select>
+      </div>
+      <div class="form-group">
+        <label>🚀 Published</label>
+        <select id="fPublished"><option value="todo">To Do</option><option value="progress">In Progress</option><option value="done">Done ✓</option></select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <textarea id="fNotes" placeholder="Links, reviewer name, recording instructions..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn" onclick="saveSprint()">Save Sprint</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settingsOverlay">
+  <div class="modal" style="max-width:420px">
+    <h3>⚙ Settings</h3>
+    <div class="form-group">
+      <label>Your Name</label>
+      <input type="text" id="sYourName" placeholder="e.g. Alex Rivera">
+    </div>
+    <div class="form-group">
+      <label>Manager Name (first name)</label>
+      <input type="text" id="sManagerName" placeholder="e.g. Sarah">
+    </div>
+    <div class="form-group">
+      <label>Manager Email</label>
+      <input type="email" id="sManagerEmail" placeholder="manager@company.com">
+      <div class="email-note">Used for the Progress Snapshot sign-off.</div>
+    </div>
+    <div class="form-group">
+      <label>Team / Project Name</label>
+      <input type="text" id="sTeamName" placeholder="e.g. L&D AI Video Team">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeSettings()">Cancel</button>
+      <button class="btn" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+<script>
+const STORAGE_KEYS = {
+  ai:      'ai_video_tracker_v4',
+  invoice: 'ai_video_tracker_invoice_v1',
+};
+const PROJECT_NAMES = {
+  ai:      'Onboarding Videos',
+  invoice: 'Invoice Delivery',
+};
+let activeProject = 'ai';
+let sprints = [];
+let editingId = null;
+
+const STAGES = [
+  { key: 'draft',      icon: '✍️',  label: 'AI Draft'      },
+  { key: 'review',     icon: '🔍',  label: 'Expert Review' },
+  { key: 'validated',  icon: '✅',  label: 'Validated'     },
+  { key: 'rec',        icon: '🎥',  label: 'Screen Rec', optional: true },
+  { key: 'production', icon: '🎬',  label: 'Production'    },
+  { key: 'published',  icon: '🚀',  label: 'Published'     },
+];
+
+// ── Persistence ──
+function load() {
+  try { const d = localStorage.getItem(STORAGE_KEYS[activeProject]); if (d) sprints = JSON.parse(d); else sprints = []; } catch(e) { sprints = []; }
+  if (!sprints.length) seedDefault();
+}
+function save() { localStorage.setItem(STORAGE_KEYS[activeProject], JSON.stringify(sprints)); }
+
+// ── Project switching ──
+function switchProject(proj) {
+  activeProject = proj;
+  document.getElementById('tab-ai').classList.toggle('active', proj === 'ai');
+  document.getElementById('tab-invoice').classList.toggle('active', proj === 'invoice');
+  document.getElementById('projectTitle').textContent = PROJECT_NAMES[proj];
+  sprints = [];
+  load();
+  render();
+}
+
+function newSprint(overrides) {
+  return Object.assign({
+    id: Date.now() + Math.floor(Math.random() * 9999),
+    title: '', scriptDate: '', videoDate: '',
+    needsRec: false,
+    draft: 'todo', review: 'todo', validated: 'todo',
+    rec: 'na', production: 'todo', published: 'todo',
+    draftScript: '', validatedScript: '', recLink: '',
+    notes: '',
+  }, overrides);
+}
+
+function seedDefault() {
+  if (activeProject === 'invoice') {
+    seedInvoice();
+  } else {
+    seedAI();
+  }
+  save();
+}
+
+function seedAI() {
+  const base = new Date('2026-06-30');
+  const topics = [
+    { title: 'Introduction to AI Tools',    draft: 'done', review: 'done', validated: 'done', production: 'progress' },
+    { title: 'Prompt Engineering Basics',   draft: 'done', review: 'progress', needsRec: true, rec: 'todo' },
+    { title: 'AI-Assisted Content Creation',needsRec: true, rec: 'todo' },
+    { title: 'Advanced AI Workflows' },
+  ];
+  topics.forEach((t, i) => {
+    const sd = new Date(base); sd.setDate(base.getDate() + i * 14);
+    const vd = new Date(sd);   vd.setDate(sd.getDate() + 14);
+    sprints.push(newSprint(Object.assign({ scriptDate: fmt(sd), videoDate: fmt(vd) }, t)));
+  });
+}
+
+function seedInvoice() {
+  const base = new Date('2026-07-07');
+  const topics = [
+    { title: 'Invoice Delivery Overview' },
+    { title: 'How to Submit an Invoice' },
+    { title: 'Common Invoice Errors & Fixes', needsRec: true, rec: 'todo' },
+    { title: 'Invoice Approval Workflow',     needsRec: true, rec: 'todo' },
+  ];
+  topics.forEach((t, i) => {
+    const sd = new Date(base); sd.setDate(base.getDate() + i * 14);
+    const vd = new Date(sd);   vd.setDate(sd.getDate() + 14);
+    sprints.push(newSprint(Object.assign({ scriptDate: fmt(sd), videoDate: fmt(vd) }, t)));
+  });
+}
+
+function fmt(d) { return d.toISOString().split('T')[0]; }
+function fmtDisplay(s) { return new Date(s + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
+function today() { return fmt(new Date()); }
+function daysUntil(ds) { return Math.round((new Date(ds+'T00:00:00') - new Date(today()+'T00:00:00')) / 86400000); }
+function dueCls(ds, status) {
+  if (status === 'done' || status === 'na') return 'done-date';
+  if (!ds) return '';
+  const d = daysUntil(ds);
+  if (d < 0) return 'overdue'; if (d <= 3) return 'soon'; return '';
+}
+function daysLabel(ds, status) {
+  if (!ds || status === 'done' || status === 'na') return '';
+  const d = daysUntil(ds);
+  if (d === 0) return ' · today'; if (d === 1) return ' · tomorrow';
+  if (d < 0) return ` · ${Math.abs(d)}d overdue`; if (d <= 7) return ` · ${d}d`; return '';
+}
+function stageProgress(s) {
+  const stages = STAGES.filter(st => !st.optional || s.needsRec);
+  const done = stages.filter(st => s[st.key] === 'done').length;
+  return { done, total: stages.length, pct: Math.round(done / stages.length * 100) };
+}
+function progressColor(pct) {
+  if (pct === 100) return 'var(--success)'; if (pct >= 50) return 'var(--accent)'; return 'var(--warn)';
+}
+function cardState(s) {
+  const p = stageProgress(s); if (p.pct === 100) return 'done';
+  const t = today();
+  if ((s.validated !== 'done' && s.scriptDate && s.scriptDate < t) ||
+      (s.published !== 'done' && s.videoDate  && s.videoDate  < t)) return 'overdue';
+  return 'active';
+}
+
+// ── Render ──
+function render() {
+  document.getElementById('todayBadge').textContent = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+  document.getElementById('statPublished').textContent = sprints.filter(s => s.published === 'done').length;
+  document.getElementById('statActive').textContent    = sprints.filter(s => cardState(s) === 'active').length;
+  document.getElementById('statBlocked').textContent   = sprints.filter(s => cardState(s) === 'overdue').length;
+  document.getElementById('statTotal').textContent     = sprints.length;
+
+  const list = document.getElementById('sprintList');
+  if (!sprints.length) {
+    list.innerHTML = `<div class="empty"><div class="icon">🎬</div><p>No sprints yet.</p><button class="btn" onclick="openModal()">+ Add First Sprint</button></div>`;
+    return;
+  }
+
+  list.innerHTML = sprints.map((s, i) => {
+    const state   = cardState(s);
+    const prog    = stageProgress(s);
+    const cardCls = state === 'done' ? 'st-done' : state === 'overdue' ? 'st-overdue' : 'st-active';
+    const badge   = state === 'done'
+      ? '<div class="card-badge badge-done">DONE</div>'
+      : state === 'overdue'
+      ? '<div class="card-badge badge-overdue">OVERDUE</div>'
+      : '<div class="card-badge badge-active">ACTIVE</div>';
+
+    const stagesHtml = STAGES.map(st => {
+      const hidden  = st.optional && !s.needsRec ? 'optional-hidden' : '';
+      const status  = s[st.key] || 'todo';
+      const ssCls   = status === 'na' ? 'ss-na' : `ss-${status}`;
+      const lbl     = status === 'todo' ? 'To Do' : status === 'progress' ? 'In Progress' : status === 'na' ? 'N/A' : 'Done ✓';
+      return `<div class="stage ${hidden}" onclick="cycleStage(${s.id},'${st.key}')" title="Click to cycle status">
+        <div class="stage-icon">${st.icon}</div>
+        <div class="stage-name">${st.label}</div>
+        <div class="stage-status ${ssCls}">${lbl}</div>
+      </div>`;
+    }).join('');
+
+    const scriptDC = dueCls(s.scriptDate, s.validated);
+    const videoDC  = dueCls(s.videoDate,  s.published);
+
+    // Assets drawer — tab dot indicators
+    const hasDraft     = (s.draftScript     || '').trim().length > 0;
+    const hasValidated = (s.validatedScript || '').trim().length > 0;
+    const hasRecLink   = (s.recLink         || '').trim().length > 0;
+    const drawerLabel  = [hasDraft && 'Draft', hasValidated && 'Validated', hasRecLink && 'Rec Link'].filter(Boolean);
+    const drawerHint   = drawerLabel.length ? `<span style="color:var(--success);font-size:.7rem;margin-left:6px">${drawerLabel.join(', ')} saved</span>` : '';
+
+    const recLinkVal  = escHtml(s.recLink || '');
+    const openDisabled = hasRecLink ? '' : 'disabled';
+
+    const drawer = `
+    <div class="assets-toggle" id="tog-${s.id}" onclick="toggleDrawer(${s.id})">
+      <span>📁 Scripts &amp; Assets${drawerHint}</span>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="assets-drawer" id="drawer-${s.id}">
+      <div class="asset-tabs">
+        <div class="asset-tab active${hasDraft?' has-content':''}"     id="tab-${s.id}-draft"      onclick="switchTab(${s.id},'draft')">✍️ AI Draft</div>
+        <div class="asset-tab${hasValidated?' has-content':''}"        id="tab-${s.id}-validated"  onclick="switchTab(${s.id},'validated')">✅ Validated Script</div>
+        <div class="asset-tab${hasRecLink?' has-content':''}"          id="tab-${s.id}-rec"        onclick="switchTab(${s.id},'rec')">🎥 Screen Recording</div>
+      </div>
+      <div class="asset-panel active" id="panel-${s.id}-draft">
+        <div class="script-meta">AI-generated draft — paste or type below</div>
+        <textarea class="script-area" placeholder="Paste your AI-generated script here..." onblur="updateField(${s.id},'draftScript',this.value)">${escHtml(s.draftScript||'')}</textarea>
+      </div>
+      <div class="asset-panel" id="panel-${s.id}-validated">
+        <div class="script-meta">Expert-validated final script</div>
+        <textarea class="script-area" placeholder="Paste the validated script here after the process expert approves it..." onblur="updateField(${s.id},'validatedScript',this.value)">${escHtml(s.validatedScript||'')}</textarea>
+      </div>
+      <div class="asset-panel" id="panel-${s.id}-rec">
+        <div class="script-meta">OneDrive link to the screen recording file</div>
+        <div class="rec-link-row">
+          <input class="rec-link-input" type="url" placeholder="Paste your OneDrive share link here..." value="${recLinkVal}" onblur="updateField(${s.id},'recLink',this.value)" id="reclink-${s.id}">
+          <a class="rec-open-btn ${openDisabled}" id="recopen-${s.id}" href="${recLinkVal||'#'}" target="_blank" rel="noopener" onclick="return openRecLink(${s.id})">↗ Open</a>
+        </div>
+        <div class="rec-hint">Tip: in OneDrive, right-click the file → Share → Copy link, then paste it above.</div>
+      </div>
+    </div>`;
+
+    const connector = i < sprints.length - 1 ? '<div class="timeline-connector"></div>' : '';
+
+    return `
+    <div class="sprint-card ${cardCls}" id="card-${s.id}">
+      ${badge}
+      <div class="card-top">
+        <div class="card-meta">
+          <div class="sprint-num">Sprint ${i + 1}</div>
+          <div class="sprint-title" contenteditable="true" onblur="updateTitle(${s.id},this.textContent)">${escHtml(s.title)}</div>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-sm btn-outline" onclick="editSprint(${s.id})">Edit</button>
+          <button class="btn btn-sm btn-outline btn-danger" onclick="deleteSprint(${s.id})">✕</button>
+        </div>
+      </div>
+
+      <div class="progress-bar"><div class="progress-fill" style="width:${prog.pct}%;background:${progressColor(prog.pct)}"></div></div>
+      <div class="pipeline">${stagesHtml}</div>
+
+      <div class="screen-rec-row">
+        <span>Screen recording needed:</span>
+        <label class="toggle-wrap" onclick="toggleRec(${s.id})">
+          <div class="toggle ${s.needsRec ? 'on' : ''}"></div>
+          <span style="font-weight:600;color:${s.needsRec ? 'var(--text)' : 'var(--muted)'}">${s.needsRec ? 'Yes' : 'No'}</span>
+        </label>
+      </div>
+
+      <div class="due-row">
+        ${s.scriptDate ? `<div class="due-item"><span class="due-label">📝 Script due:</span><span class="due-date ${scriptDC}">${fmtDisplay(s.scriptDate)}${daysLabel(s.scriptDate, s.validated)}</span></div>` : ''}
+        ${s.videoDate  ? `<div class="due-item"><span class="due-label">🚀 Publish by:</span><span class="due-date ${videoDC}">${fmtDisplay(s.videoDate)}${daysLabel(s.videoDate, s.published)}</span></div>` : ''}
+        <div class="due-item" style="margin-left:auto"><span class="due-label">Progress:</span><span class="due-date" style="color:${progressColor(prog.pct)}">${prog.done}/${prog.total} stages</span></div>
+      </div>
+
+      ${drawer}
+
+      <div class="sprint-notes">
+        <textarea placeholder="Notes, reviewer name, extra links..." onblur="updateNotes(${s.id},this.value)">${escHtml(s.notes)}</textarea>
+      </div>
+    </div>
+    ${connector}`;
+  }).join('');
+}
+
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Drawer ──
+function toggleDrawer(id) {
+  const tog = document.getElementById('tog-' + id);
+  const drw = document.getElementById('drawer-' + id);
+  tog.classList.toggle('open');
+  drw.classList.toggle('open');
+}
+
+function switchTab(id, tab) {
+  ['draft','validated','rec'].forEach(t => {
+    document.getElementById(`tab-${id}-${t}`).classList.toggle('active', t === tab);
+    document.getElementById(`panel-${id}-${t}`).classList.toggle('active', t === tab);
+  });
+}
+
+function openRecLink(id) {
+  const input = document.getElementById('reclink-' + id);
+  const url = (input ? input.value : '') || (sprints.find(x => x.id === id) || {}).recLink || '';
+  if (!url || url === '#') return false;
+  window.open(url, '_blank', 'noopener');
+  return false;
+}
+
+// ── Field updates ──
+function updateField(id, field, val) {
+  const s = sprints.find(x => x.id === id); if (!s) return;
+  s[field] = val; save();
+  // Update open-link button state without full re-render
+  if (field === 'recLink') {
+    const btn = document.getElementById('recopen-' + id);
+    if (btn) { btn.classList.toggle('disabled', !val.trim()); btn.href = val.trim() || '#'; }
+  }
+  // Refresh tab dot indicator
+  const tabId = field === 'draftScript' ? 'draft' : field === 'validatedScript' ? 'validated' : null;
+  if (tabId) {
+    const tab = document.getElementById(`tab-${id}-${tabId}`);
+    if (tab) tab.classList.toggle('has-content', val.trim().length > 0);
+  }
+  if (field === 'recLink') {
+    const tab = document.getElementById(`tab-${id}-rec`);
+    if (tab) tab.classList.toggle('has-content', val.trim().length > 0);
+  }
+  // Refresh drawer hint line
+  const tog = document.getElementById('tog-' + id);
+  if (tog) {
+    const sp = sprints.find(x => x.id === id);
+    const hasDraft     = (sp.draftScript     || '').trim().length > 0;
+    const hasValidated = (sp.validatedScript || '').trim().length > 0;
+    const hasRecLink   = (sp.recLink         || '').trim().length > 0;
+    const labels = [hasDraft && 'Draft', hasValidated && 'Validated', hasRecLink && 'Rec Link'].filter(Boolean);
+    const hint   = labels.length ? `<span style="color:var(--success);font-size:.7rem;margin-left:6px">${labels.join(', ')} saved</span>` : '';
+    tog.querySelector('span:first-child').innerHTML = `📁 Scripts &amp; Assets${hint}`;
+  }
+}
+
+function updateTitle(id, val) {
+  const s = sprints.find(x => x.id === id);
+  if (s) { s.title = val.trim() || s.title; save(); }
+}
+function updateNotes(id, val) {
+  const s = sprints.find(x => x.id === id); if (s) { s.notes = val; save(); }
+}
+
+// ── Actions ──
+function cycleStage(id, key) {
+  const s = sprints.find(x => x.id === id); if (!s) return;
+  if (STAGES.find(st => st.key === key)?.optional && !s.needsRec) return;
+  const order = key === 'rec' ? ['todo','progress','done','na'] : ['todo','progress','done'];
+  s[key] = order[(order.indexOf(s[key]) + 1) % order.length];
+  save(); render();
+}
+function toggleRec(id) {
+  const s = sprints.find(x => x.id === id); if (!s) return;
+  s.needsRec = !s.needsRec;
+  if (!s.needsRec) s.rec = 'na'; else if (s.rec === 'na') s.rec = 'todo';
+  save(); render();
+}
+function deleteSprint(id) {
+  if (!confirm('Delete this sprint?')) return;
+  sprints = sprints.filter(x => x.id !== id); save(); render();
+}
+
+// ── Modal ──
+function openModal() {
+  editingId = null;
+  document.getElementById('modalTitle').textContent = 'Add New Sprint';
+  let ds = today();
+  if (sprints.length) {
+    const d = new Date(sprints[sprints.length-1].scriptDate + 'T12:00:00');
+    d.setDate(d.getDate() + 14); ds = fmt(d);
+  }
+  const vd = new Date(ds + 'T12:00:00'); vd.setDate(vd.getDate() + 14);
+  document.getElementById('fTitle').value = '';
+  document.getElementById('fScriptDate').value = ds;
+  document.getElementById('fVideoDate').value = fmt(vd);
+  document.getElementById('fNeedsRec').checked = false;
+  ['fDraft','fReview','fValidated','fProduction','fPublished'].forEach(id => document.getElementById(id).value = 'todo');
+  document.getElementById('fRec').value = 'na';
+  document.getElementById('fNotes').value = '';
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function editSprint(id) {
+  const s = sprints.find(x => x.id === id); if (!s) return;
+  editingId = id;
+  document.getElementById('modalTitle').textContent = 'Edit Sprint';
+  document.getElementById('fTitle').value      = s.title;
+  document.getElementById('fScriptDate').value = s.scriptDate;
+  document.getElementById('fVideoDate').value  = s.videoDate;
+  document.getElementById('fNeedsRec').checked = !!s.needsRec;
+  document.getElementById('fDraft').value      = s.draft      || 'todo';
+  document.getElementById('fReview').value     = s.review     || 'todo';
+  document.getElementById('fValidated').value  = s.validated  || 'todo';
+  document.getElementById('fRec').value        = s.rec        || 'na';
+  document.getElementById('fProduction').value = s.production || 'todo';
+  document.getElementById('fPublished').value  = s.published  || 'todo';
+  document.getElementById('fNotes').value      = s.notes      || '';
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); editingId = null; }
+function saveSprint() {
+  const title = document.getElementById('fTitle').value.trim();
+  if (!title) { alert('Please enter a video title.'); return; }
+  const data = {
+    title,
+    scriptDate:  document.getElementById('fScriptDate').value,
+    videoDate:   document.getElementById('fVideoDate').value,
+    needsRec:    document.getElementById('fNeedsRec').checked,
+    draft:       document.getElementById('fDraft').value,
+    review:      document.getElementById('fReview').value,
+    validated:   document.getElementById('fValidated').value,
+    rec:         document.getElementById('fNeedsRec').checked ? document.getElementById('fRec').value : 'na',
+    production:  document.getElementById('fProduction').value,
+    published:   document.getElementById('fPublished').value,
+    notes:       document.getElementById('fNotes').value,
+  };
+  if (editingId) {
+    const idx = sprints.findIndex(x => x.id === editingId);
+    if (idx >= 0) sprints[idx] = Object.assign(sprints[idx], data);
+  } else {
+    sprints.push(newSprint(data));
+  }
+  sprints.sort((a,b) => (a.scriptDate||'').localeCompare(b.scriptDate||''));
+  save(); closeModal(); render();
+}
+
+document.getElementById('fScriptDate').addEventListener('change', function() {
+  const d = new Date(this.value + 'T12:00:00'); d.setDate(d.getDate() + 14);
+  document.getElementById('fVideoDate').value = fmt(d);
+});
+document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+function statusLabel(s) { return s === 'todo' ? 'To Do' : s === 'progress' ? 'In Progress' : s === 'na' ? 'N/A' : 'Done'; }
+
+// ── Export CSV ──
+function exportCSV() {
+  const header = ['Sprint','Title','Script Due','Video Publish','Needs Rec','AI Draft Stage','Expert Review','Validated','Screen Rec','Production','Published','Rec Link','Notes'];
+  const rows = sprints.map((s,i) => [
+    i+1,
+    `"${(s.title||'').replace(/"/g,'""')}"`,
+    s.scriptDate, s.videoDate,
+    s.needsRec ? 'Yes' : 'No',
+    statusLabel(s.draft), statusLabel(s.review), statusLabel(s.validated),
+    statusLabel(s.rec), statusLabel(s.production), statusLabel(s.published),
+    `"${(s.recLink||'').replace(/"/g,'""')}"`,
+    `"${(s.notes||'').replace(/"/g,'""').replace(/\n/g,' ')}"`,
+  ]);
+  const csv = [header,...rows].map(r=>r.join(',')).join('\n');
+  downloadFile(`${activeProject}-tracker.csv`,'text/csv',csv);
+}
+
+function exportHTML() {
+  const key = STORAGE_KEYS[activeProject];
+  const src = document.documentElement.outerHTML;
+  const preload = `\n  (function(){ try { localStorage.setItem('${key}', ${JSON.stringify(JSON.stringify(sprints))}); } catch(e){} })();\n  `;
+  const injected = src.replace(/const STORAGE_KEYS = /, preload + 'const STORAGE_KEYS = ');
+  downloadFile(`${activeProject}-tracker-${today()}.html`, 'text/html', injected);
+}
+
+function downloadFile(filename, mime, content) {
+  const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(new Blob([content],{type:mime})), download: filename });
+  a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+// ── Settings ──
+const SETTINGS_KEY = 'ai_video_tracker_settings';
+let settings = { yourName: '', managerName: '', managerEmail: '', teamName: '' };
+
+function loadSettings() {
+  try { const d = localStorage.getItem(SETTINGS_KEY); if (d) settings = Object.assign(settings, JSON.parse(d)); } catch(e) {}
+}
+function saveSettings() {
+  settings.yourName     = document.getElementById('sYourName').value.trim();
+  settings.managerName  = document.getElementById('sManagerName').value.trim();
+  settings.managerEmail = document.getElementById('sManagerEmail').value.trim();
+  settings.teamName     = document.getElementById('sTeamName').value.trim();
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  closeSettings();
+}
+function openSettings() {
+  document.getElementById('sYourName').value     = settings.yourName;
+  document.getElementById('sManagerName').value  = settings.managerName;
+  document.getElementById('sManagerEmail').value = settings.managerEmail;
+  document.getElementById('sTeamName').value     = settings.teamName;
+  document.getElementById('settingsOverlay').classList.add('open');
+}
+function closeSettings() { document.getElementById('settingsOverlay').classList.remove('open'); }
+
+document.getElementById('settingsOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeSettings(); });
+
+// ── Progress Snapshot ──
+function openDashboard() {
+  const now    = new Date();
+  const month  = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const team   = settings.teamName || PROJECT_NAMES[activeProject];
+  const fmt2   = ds => ds ? new Date(ds+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'TBD';
+
+  const total       = sprints.length;
+  const pubCount    = sprints.filter(s => s.published === 'done').length;
+  const inProd      = sprints.filter(s => s.published !== 'done' && s.production === 'progress').length;
+  const inReview    = sprints.filter(s => s.validated !== 'done' && s.review !== 'todo').length;
+  const overdue     = sprints.filter(s => cardState(s) === 'overdue').length;
+  const pct         = total ? Math.round(pubCount / total * 100) : 0;
+  const healthBg    = overdue === 0 ? '#16a34a' : overdue <= 1 ? '#d97706' : '#dc2626';
+  const healthLabel = overdue === 0 ? 'On Track' : overdue <= 1 ? 'Slight Delay' : 'Needs Attention';
+
+  function nsLabel(s) {
+    if (s.published === 'done')      return { t: 'Published',                   c: '#16a34a' };
+    if (s.production === 'progress') return { t: 'In video production',          c: '#7c3aed' };
+    if (s.validated === 'done')      return { t: 'Ready for production',         c: '#0891b2' };
+    if (s.rec === 'progress')        return { t: 'Screen recording in progress', c: '#ea580c' };
+    if (s.needsRec && s.rec === 'todo' && s.validated === 'done')
+                                     return { t: 'Awaiting screen recording',    c: '#ea580c' };
+    if (s.review === 'progress')     return { t: 'With expert for review',       c: '#d97706' };
+    if (s.review === 'done' && s.validated !== 'done')
+                                     return { t: 'Awaiting final validation',    c: '#d97706' };
+    if (s.draft === 'progress')      return { t: 'AI script draft in progress',  c: '#6c63ff' };
+    if (s.draft === 'done')          return { t: 'Draft done - send to expert',  c: '#6c63ff' };
+    return                                  { t: 'Not yet started',              c: '#9ca3af' };
+  }
+
+  function stageRow(s) {
+    return [
+      { key: 'draft',      label: 'AI Draft' },
+      { key: 'review',     label: 'Expert Review' },
+      { key: 'validated',  label: 'Validated' },
+      { key: 'rec',        label: 'Screen Rec', optional: true },
+      { key: 'production', label: 'Production' },
+      { key: 'published',  label: 'Published' },
+    ].filter(st => !st.optional || s.needsRec).map(st => {
+      const v   = s[st.key] || 'todo';
+      const bg  = v === 'done' ? '#dcfce7' : v === 'progress' ? '#fef9c3' : '#f3f4f6';
+      const col = v === 'done' ? '#15803d' : v === 'progress' ? '#92400e' : '#9ca3af';
+      const sym = v === 'done' ? '&#10003;' : v === 'progress' ? '...' : '&#9675;';
+      return `<td style="padding:2px"><div style="background:${bg};border-radius:5px;padding:4px 2px;text-align:center">
+        <div style="font-size:9px;color:${col};font-weight:700;white-space:nowrap">${st.label}</div>
+        <div style="font-size:11px;color:${col};font-weight:800">${sym}</div>
+      </div></td>`;
+    }).join('');
+  }
+
+  const videoCards = sprints.map((s, i) => {
+    const ns     = nsLabel(s);
+    const isOver = cardState(s) === 'overdue';
+    const prog   = stageProgress(s);
+    const border = isOver ? '#fca5a5' : s.published === 'done' ? '#bbf7d0' : '#e5e7eb';
+    const topBg  = isOver ? '#fff1f2' : s.published === 'done' ? '#f0fdf4' : '#f9fafb';
+    const barCol = prog.pct === 100 ? '#16a34a' : prog.pct >= 50 ? '#6c63ff' : '#d97706';
+    return `
+    <div style="background:white;border:1.5px solid ${border};border-radius:10px;overflow:hidden;margin-bottom:10px">
+      <div style="background:${topBg};padding:10px 14px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div>
+          <div style="font-size:9px;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Video ${i+1}</div>
+          <div style="font-size:14px;font-weight:700;color:#111827;margin-top:1px">${s.title || 'Untitled'}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <span style="background:${ns.c};color:white;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap">${ns.t}</span>
+          ${isOver ? '<div style="font-size:9px;color:#dc2626;font-weight:700;margin-top:3px">BEHIND SCHEDULE</div>' : ''}
+        </div>
+      </div>
+      <div style="padding:10px 14px 4px"><table width="100%" cellpadding="0" cellspacing="0"><tr>${stageRow(s)}</tr></table></div>
+      <div style="padding:5px 14px">
+        <div style="height:5px;background:#f3f4f6;border-radius:4px;overflow:hidden">
+          <div style="height:100%;width:${prog.pct}%;background:${barCol};border-radius:4px"></div>
+        </div>
+      </div>
+      <div style="padding:6px 14px 10px;display:flex;justify-content:space-between;font-size:11px;color:#6b7280">
+        <span><b style="color:#374151">Script due:</b> ${fmt2(s.scriptDate)} &nbsp; <b style="color:#374151">Publish by:</b> ${fmt2(s.videoDate)}</span>
+        <span style="font-weight:700;color:${barCol}">${prog.done}/${prog.total} stages</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  const page = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>${team} - Progress Snapshot</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:Arial,Helvetica,sans-serif; background:#f1f5f9; }
+  .toolbar { background:#1e293b; color:#94a3b8; font-size:12px; padding:10px 20px; display:flex; align-items:center; justify-content:space-between; }
+  .toolbar b { color:white; }
+  .toolbar button { background:#6c63ff; color:white; border:none; border-radius:6px; padding:6px 14px; font-size:12px; font-weight:600; cursor:pointer; }
+  @media print { .toolbar { display:none; } body { background:white; } }
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <span><b>Progress Snapshot</b> &mdash; Use Snipping Tool or Cmd+Shift+4 to screenshot and attach to your email.</span>
+  <button onclick="window.print()">Print / Save PDF</button>
+</div>
+<div style="width:640px;margin:0 auto;padding:24px 0">
+
+  <!-- Header -->
+  <div style="background:#1a1d27;border-radius:12px 12px 0 0;padding:18px 22px;display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <div style="font-size:11px;color:#8b91b6;text-transform:uppercase;letter-spacing:.5px">${month}</div>
+      <div style="font-size:20px;font-weight:800;color:white;margin-top:3px">${team}</div>
+      <div style="font-size:11px;color:#8b91b6;margin-top:2px">Training Video Production Update</div>
+    </div>
+    <span style="background:${healthBg};color:white;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700">${healthLabel}</span>
+  </div>
+
+  <!-- Summary tiles -->
+  <div style="background:white;padding:16px 22px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+    <div style="background:#f0fdf4;border-radius:10px;padding:12px;text-align:center">
+      <div style="font-size:28px;font-weight:800;color:#16a34a">${pubCount}</div>
+      <div style="font-size:9px;color:#6b7280;text-transform:uppercase;letter-spacing:.4px;margin-top:2px">Published</div>
+    </div>
+    <div style="background:#f5f3ff;border-radius:10px;padding:12px;text-align:center">
+      <div style="font-size:28px;font-weight:800;color:#7c3aed">${inProd}</div>
+      <div style="font-size:9px;color:#6b7280;text-transform:uppercase;letter-spacing:.4px;margin-top:2px">In Production</div>
+    </div>
+    <div style="background:#fffbeb;border-radius:10px;padding:12px;text-align:center">
+      <div style="font-size:28px;font-weight:800;color:#d97706">${inReview}</div>
+      <div style="font-size:9px;color:#6b7280;text-transform:uppercase;letter-spacing:.4px;margin-top:2px">Under Review</div>
+    </div>
+    <div style="background:${overdue>0?'#fff1f2':'#f9fafb'};border-radius:10px;padding:12px;text-align:center">
+      <div style="font-size:28px;font-weight:800;color:${overdue>0?'#dc2626':'#9ca3af'}">${overdue}</div>
+      <div style="font-size:9px;color:#6b7280;text-transform:uppercase;letter-spacing:.4px;margin-top:2px">Overdue</div>
+    </div>
+  </div>
+
+  <!-- Progress bar -->
+  <div style="background:white;padding:0 22px 16px">
+    <div style="background:#f9fafb;border-radius:8px;padding:12px">
+      <div style="font-size:11px;font-weight:600;color:#374151;margin-bottom:7px">${pubCount} of ${total} videos published (${pct}%)</div>
+      <div style="height:8px;background:#e5e7eb;border-radius:6px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:#6c63ff;border-radius:6px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Video cards -->
+  <div style="background:white;padding:0 22px 16px;border-radius:0 0 12px 12px">
+    <div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">All Videos</div>
+    ${videoCards}
+  </div>
+
+  <div style="text-align:center;font-size:10px;color:#9ca3af;margin-top:10px">Generated ${now.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div>
+</div>
+</body>
+</html>`;
+
+  const win = window.open('', '_blank');
+  win.document.open();
+  win.document.write(page);
+  win.document.close();
+}
+
+
+// ── Init ──
+loadSettings();
+load();
+render();
+</script>
+</body>
+</html>
