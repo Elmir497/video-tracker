@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI Training Video Tracker</title>
@@ -232,7 +230,7 @@
       <button class="project-tab" id="tab-invoice" onclick="switchProject('invoice')">Invoice Delivery</button>
     </div>
     <button class="settings-btn" onclick="openSettings()">⚙ Settings</button>
-    <div class="today-badge" id="todayBadge"></div>
+    <div class="today-badge" id="todayBadge">Tue, Sep 8, 2026</div>
   </div>
 </header>
 
@@ -267,9 +265,9 @@
 
   <div class="stats">
     <div class="stat-card c-published"><div class="num" id="statPublished">0</div><div class="lbl">Published</div></div>
-    <div class="stat-card c-active"><div class="num" id="statActive">0</div><div class="lbl">In Progress</div></div>
+    <div class="stat-card c-active"><div class="num" id="statActive">5</div><div class="lbl">In Progress</div></div>
     <div class="stat-card c-blocked"><div class="num" id="statBlocked">0</div><div class="lbl">Overdue</div></div>
-    <div class="stat-card c-total"><div class="num" id="statTotal">0</div><div class="lbl">Total Sprints</div></div>
+    <div class="stat-card c-total"><div class="num" id="statTotal">5</div><div class="lbl">Total Sprints</div></div>
   </div>
 
   <div class="section-header">
@@ -290,7 +288,496 @@
     <div class="legend-item" style="margin-left:4px;font-style:italic">Click any stage to cycle its status</div>
   </div>
 
-  <div class="sprint-list" id="sprintList"></div>
+  <div class="sprint-list" id="sprintList">
+    <div class="sprint-card st-active" id="card-1782994025804">
+      <div class="card-badge badge-active">ACTIVE</div>
+      <div class="card-top">
+        <div class="card-meta">
+          <div class="sprint-num">Sprint 1</div>
+          <div class="sprint-title" contenteditable="true" onblur="updateTitle(1782994025804,this.textContent)">How to create an installment plan?</div>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-sm btn-outline" onclick="editSprint(1782994025804)">Edit</button>
+          <button class="btn btn-sm btn-outline btn-danger" onclick="deleteSprint(1782994025804)">✕</button>
+        </div>
+      </div>
+
+      <div class="progress-bar"><div class="progress-fill" style="width:17%;background:var(--warn)"></div></div>
+      <div class="pipeline"><div class="stage " onclick="cycleStage(1782994025804,'draft')" title="Click to cycle status">
+        <div class="stage-icon">✍️</div>
+        <div class="stage-name">AI Draft</div>
+        <div class="stage-status ss-done">Done ✓</div>
+      </div><div class="stage " onclick="cycleStage(1782994025804,'review')" title="Click to cycle status">
+        <div class="stage-icon">🔍</div>
+        <div class="stage-name">Expert Review</div>
+        <div class="stage-status ss-progress">In Progress</div>
+      </div><div class="stage " onclick="cycleStage(1782994025804,'validated')" title="Click to cycle status">
+        <div class="stage-icon">✅</div>
+        <div class="stage-name">Validated</div>
+        <div class="stage-status ss-todo">To Do</div>
+      </div><div class="stage " onclick="cycleStage(1782994025804,'rec')" title="Click to cycle status">
+        <div class="stage-icon">🎥</div>
+        <div class="stage-name">Screen Rec</div>
+        <div class="stage-status ss-todo">To Do</div>
+      </div><div class="stage " onclick="cycleStage(1782994025804,'production')" title="Click to cycle status">
+        <div class="stage-icon">🎬</div>
+        <div class="stage-name">Production</div>
+        <div class="stage-status ss-todo">To Do</div>
+      </div><div class="stage " onclick="cycleStage(1782994025804,'published')" title="Click to cycle status">
+        <div class="stage-icon">🚀</div>
+        <div class="stage-name">Published</div>
+        <div class="stage-status ss-todo">To Do</div>
+      </div></div>
+
+      <div class="screen-rec-row">
+        <span>Screen recording needed:</span>
+        <label class="toggle-wrap" onclick="toggleRec(1782994025804)">
+          <div class="toggle on"></div>
+          <span style="font-weight:600;color:var(--text)">Yes</span>
+        </label>
+      </div>
+
+      <div class="due-row">
+        <div class="due-item"><span class="due-label">📝 Script due:</span><span class="due-date soon">Sep 9, 2026 · tomorrow</span></div>
+        <div class="due-item"><span class="due-label">🚀 Publish by:</span><span class="due-date ">Sep 23, 2026</span></div>
+        <div class="due-item" style="margin-left:auto"><span class="due-label">Progress:</span><span class="due-date" style="color:var(--warn)">1/6 stages</span></div>
+      </div>
+
+      
+    <div class="assets-toggle" id="tog-1782994025804" onclick="toggleDrawer(1782994025804)">
+      <span>📁 Scripts &amp; Assets</span>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="assets-drawer" id="drawer-1782994025804">
+      <div class="asset-tabs">
+        <div class="asset-tab active" id="tab-1782994025804-draft" onclick="switchTab(1782994025804,'draft')">✍️ AI Draft</div>
+        <div class="asset-tab" id="tab-1782994025804-validated" onclick="switchTab(1782994025804,'validated')">✅ Validated Script</div>
+        <div class="asset-tab" id="tab-1782994025804-rec" onclick="switchTab(1782994025804,'rec')">🎥 Screen Recording</div>
+      </div>
+      <div class="asset-panel active" id="panel-1782994025804-draft">
+        <div class="script-meta">AI-generated draft — paste or type below</div>
+        <textarea class="script-area" placeholder="Paste your AI-generated script here..." onblur="updateField(1782994025804,'draftScript',this.value)"></textarea>
+      </div>
+      <div class="asset-panel" id="panel-1782994025804-validated">
+        <div class="script-meta">Expert-validated final script</div>
+        <textarea class="script-area" placeholder="Paste the validated script here after the process expert approves it..." onblur="updateField(1782994025804,'validatedScript',this.value)"></textarea>
+      </div>
+      <div class="asset-panel" id="panel-1782994025804-rec">
+        <div class="script-meta">OneDrive link to the screen recording file</div>
+        <div class="rec-link-row">
+          <input class="rec-link-input" type="url" placeholder="Paste your OneDrive share link here..." value="" onblur="updateField(1782994025804,'recLink',this.value)" id="reclink-1782994025804">
+          <a class="rec-open-btn disabled" id="recopen-1782994025804" href="#" target="_blank" rel="noopener" onclick="return openRecLink(1782994025804)">↗ Open</a>
+        </div>
+        <div class="rec-hint">Tip: in OneDrive, right-click the file → Share → Copy link, then paste it above.</div>
+      </div>
+    </div>
+
+      <div class="sprint-notes">
+        <textarea placeholder="Notes, reviewer name, extra links..." onblur="updateNotes(1782994025804,this.value)"></textarea>
+      </div>
+    </div>
+    <div class="timeline-connector"></div>
+    <div class="sprint-card st-active" id="card-1782994020882">
+      <div class="card-badge badge-active">ACTIVE</div>
+      <div class="card-top">
+        <div class="card-meta">
+          <div class="sprint-num">Sprint 2</div>
+          <div class="sprint-title" contenteditable="true" onblur="updateTitle(1782994020882,this.textContent)">How to log a dispute case?</div>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-sm btn-outline" onclick="editSprint(1782994020882)">Edit</button>
+          <button class="btn btn-sm btn-outline btn-danger" onclick="deleteSprint(1782994020882)">✕</button>
+        </div>
+      </div>
+
+      <div class="progress-bar"><div class="progress-fill" style="width:17%;background:var(--warn)"></div></div>
+      <div class="pipeline"><div class="stage " onclick="cycleStage(1782994020882,'draft')" title="Click to cycle status">
+        <div class="stage-icon">✍️</div>
+        <div class="stage-name">AI Draft</div>
+        <div class="stage-status ss-done">Done ✓</div>
+      </div><div class="stage " onclick="cycleStage(1782994020882,'review')" title="Click to cycle status">
+        <div class="stage-icon">🔍</div>
+        <div class="stage-name">Expert Review</div>
+        <div class="stage-status ss-progress">In Progress</div>
+      </div><div class="stage " onclick="cycleStage(1782994020882,'validated')" title="Click to cycle status">
+        <div class="stage-icon">✅</div>
+        <div class="stage-name">Validated</div>
+        <div class="stage-status ss-todo">To Do</div>
+      </div><div class="stage " onclick="cycleStage(1782994020882,'rec')" title="Click to cycle status">
+        <div class="stage-icon">🎥</div>
+        <div class="stage-name">Screen Rec</div>
+        <div class="stage-status ss-todo">To Do</div>
+      </div><div class="stage " onclick="cycleStage(1782994020882,'production')" title="Click to cycle status">
+        <div class="stage-icon">🎬</div>
+        <div class="stage-name">Production</div>
+        <div class="stage-status ss-todo">To Do</div>
+      </div><div class="stage " onclick="cycleStage(1782994020882,'published')" title="Click to cycle status">
+        <div class="stage-icon">🚀</div>
+        <div class="stage-name">Published</div>
+        <div class="stage-status ss-todo">To Do</div>
+      </div></div>
+
+      <div class="screen-rec-row">
+        <span>Screen recording needed:</span>
+        <label class="toggle-wrap" onclick="toggleRec(1782994020882)">
+          <div class="toggle on"></div>
+          <span style="font-weight:600;color:var(--text)">Yes</span>
+        </label>
+      </div>
+
+      <div class="due-row">
+        <div class="due-item"><span class="due-label">📝 Script due:</span><span class="due-date ">Sep 23, 2026</span></div>
+        <div class="due-item"><span class="due-label">🚀 Publish by:</span><span class="due-date ">Oct 7, 2026</span></div>
+        <div class="due-item" style="margin-left:auto"><span class="due-label">Progress:</span><span class="due-date" style="color:var(--warn)">1/6 stages</span></div>
+      </div>
+
+      
+    <div class="assets-toggle" id="tog-1782994020882" onclick="toggleDrawer(1782994020882)">
+      <span>📁 Scripts &amp; Assets</span>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="assets-drawer" id="drawer-1782994020882">
+      <div class="asset-tabs">
+        <div class="asset-tab active" id="tab-1782994020882-draft" onclick="switchTab(1782994020882,'draft')">✍️ AI Draft</div>
+        <div class="asset-tab" id="tab-1782994020882-validated" onclick="switchTab(1782994020882,'validated')">✅ Validated Script</div>
+        <div class="asset-tab" id="tab-1782994020882-rec" onclick="switchTab(1782994020882,'rec')">🎥 Screen Recording</div>
+      </div>
+      <div class="asset-panel active" id="panel-1782994020882-draft">
+        <div class="script-meta">AI-generated draft — paste or type below</div>
+        <textarea class="script-area" placeholder="Paste your AI-generated script here..." onblur="updateField(1782994020882,'draftScript',this.value)"></textarea>
+      </div>
+      <div class="asset-panel" id="panel-1782994020882-validated">
+        <div class="script-meta">Expert-validated final script</div>
+        <textarea class="script-area" placeholder="Paste the validated script here after the process expert approves it..." onblur="updateField(1782994020882,'validatedScript',this.value)"></textarea>
+      </div>
+      <div class="asset-panel" id="panel-1782994020882-rec">
+        <div class="script-meta">OneDrive link to the screen recording file</div>
+        <div class="rec-link-row">
+          <input class="rec-link-input" type="url" placeholder="Paste your OneDrive share link here..." value="" onblur="updateField(1782994020882,'recLink',this.value)" id="reclink-1782994020882">
+          <a class="rec-open-btn disabled" id="recopen-1782994020882" href="#" target="_blank" rel="noopener" onclick="return openRecLink(1782994020882)">↗ Open</a>
+        </div>
+        <div class="rec-hint">Tip: in OneDrive, right-click the file → Share → Copy link, then paste it above.</div>
+      </div>
+    </div>
+
+      <div class="sprint-notes">
+        <textarea placeholder="Notes, reviewer name, extra links..." onblur="updateNotes(1782994020882,this.value)"></textarea>
+      </div>
+    </div>
+    <div class="timeline-connector"></div>
+    <div class="sprint-card st-active" id="card-1782999135765">
+      <div class="card-badge badge-active">ACTIVE</div>
+      <div class="card-top">
+        <div class="card-meta">
+          <div class="sprint-num">Sprint 3</div>
+          <div class="sprint-title" contenteditable="true" onblur="updateTitle(1782999135765,this.textContent)">Termination: How to identify if an invoice is valid?</div>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-sm btn-outline" onclick="editSprint(1782999135765)">Edit</button>
+          <button class="btn btn-sm btn-outline btn-danger" onclick="deleteSprint(1782999135765)">✕</button>
+        </div>
+      </div>
+
+      <div class="progress-bar"><div class="progress-fill" style="width:17%;background:var(--warn)"></div></div>
+      <div class="pipeline"><div class="stage " onclick="cycleStage(1782999135765,'draft')" title="Click to cycle status">
+        <div class="stage-icon">✍️</div>
+        <div class="stage-name">AI Draft</div>
+        <div class="stage-status ss-done">Done ✓</div>
+      </div><div class="stage " onclick="cycleStage(1782999135765,'review')" title="Click to cycle status">
+        <div class="stage-icon">🔍</div>
+        <div class="stage-name">Expert Review</div>
+        <div class="stage-status ss-progress">In Progress</div>
+      </div><div class="stage " onclick="cycleStage(1782999135765,'validated')" title="Click to cycle status">
+        <div class="stage-icon">✅</div>
+        <div class="stage-name">Validated</div>
+        <div class="stage-status ss-todo">To Do</div>
+      </div><div class="stage " onclick="cycleStage(1782999135765,'rec')" title="Click to cycle status">
+        <div class="stage-icon">🎥</div>
+        <div class="stage-name">Screen Rec</div>
+        <div class="stage-status ss-todo">To Do</div>
+      </div><div class="stage " onclick="cycleStage(1782999135765,'production')" title="Click to cycle status">
+        <div class="stage-icon">🎬</div>
+        <div class="stage-name">Production</div>
+        <div class="stage-status ss-todo">To Do</div>
+      </div><div class="stage " onclick="cycleStage(1782999135765,'published')" title="Click to cycle status">
+        <div class="stage-icon">🚀</div>
+        <div class="stage-name">Published</div>
+        <div class="stage-status ss-todo">To Do</div>
+      </div></div>
+
+      <div class="screen-rec-row">
+        <span>Screen recording needed:</span>
+        <label class="toggle-wrap" onclick="toggleRec(1782999135765)">
+          <div class="toggle on"></div>
+          <span style="font-weight:600;color:var(--text)">Yes</span>
+        </label>
+      </div>
+
+      <div class="due-row">
+        <div class="due-item"><span class="due-label">📝 Script due:</span><span class="due-date ">Oct 7, 2026</span></div>
+        <div class="due-item"><span class="due-label">🚀 Publish by:</span><span class="due-date ">Oct 21, 2026</span></div>
+        <div class="due-item" style="margin-left:auto"><span class="due-label">Progress:</span><span class="due-date" style="color:var(--warn)">1/6 stages</span></div>
+      </div>
+
+      
+    <div class="assets-toggle" id="tog-1782999135765" onclick="toggleDrawer(1782999135765)">
+      <span>📁 Scripts &amp; Assets</span>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="assets-drawer" id="drawer-1782999135765">
+      <div class="asset-tabs">
+        <div class="asset-tab active" id="tab-1782999135765-draft" onclick="switchTab(1782999135765,'draft')">✍️ AI Draft</div>
+        <div class="asset-tab" id="tab-1782999135765-validated" onclick="switchTab(1782999135765,'validated')">✅ Validated Script</div>
+        <div class="asset-tab" id="tab-1782999135765-rec" onclick="switchTab(1782999135765,'rec')">🎥 Screen Recording</div>
+      </div>
+      <div class="asset-panel active" id="panel-1782999135765-draft">
+        <div class="script-meta">AI-generated draft — paste or type below</div>
+        <textarea class="script-area" placeholder="Paste your AI-generated script here..." onblur="updateField(1782999135765,'draftScript',this.value)"></textarea>
+      </div>
+      <div class="asset-panel" id="panel-1782999135765-validated">
+        <div class="script-meta">Expert-validated final script</div>
+        <textarea class="script-area" placeholder="Paste the validated script here after the process expert approves it..." onblur="updateField(1782999135765,'validatedScript',this.value)"></textarea>
+      </div>
+      <div class="asset-panel" id="panel-1782999135765-rec">
+        <div class="script-meta">OneDrive link to the screen recording file</div>
+        <div class="rec-link-row">
+          <input class="rec-link-input" type="url" placeholder="Paste your OneDrive share link here..." value="" onblur="updateField(1782999135765,'recLink',this.value)" id="reclink-1782999135765">
+          <a class="rec-open-btn disabled" id="recopen-1782999135765" href="#" target="_blank" rel="noopener" onclick="return openRecLink(1782999135765)">↗ Open</a>
+        </div>
+        <div class="rec-hint">Tip: in OneDrive, right-click the file → Share → Copy link, then paste it above.</div>
+      </div>
+    </div>
+
+      <div class="sprint-notes">
+        <textarea placeholder="Notes, reviewer name, extra links..." onblur="updateNotes(1782999135765,this.value)"></textarea>
+      </div>
+    </div>
+    <div class="timeline-connector"></div>
+    <div class="sprint-card st-active" id="card-1782994025160">
+      <div class="card-badge badge-active">ACTIVE</div>
+      <div class="card-top">
+        <div class="card-meta">
+          <div class="sprint-num">Sprint 4</div>
+          <div class="sprint-title" contenteditable="true" onblur="updateTitle(1782994025160,this.textContent)">How to log a promise-to-pay?</div>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-sm btn-outline" onclick="editSprint(1782994025160)">Edit</button>
+          <button class="btn btn-sm btn-outline btn-danger" onclick="deleteSprint(1782994025160)">✕</button>
+        </div>
+      </div>
+
+      <div class="progress-bar"><div class="progress-fill" style="width:17%;background:var(--warn)"></div></div>
+      <div class="pipeline"><div class="stage " onclick="cycleStage(1782994025160,'draft')" title="Click to cycle status">
+        <div class="stage-icon">✍️</div>
+        <div class="stage-name">AI Draft</div>
+        <div class="stage-status ss-done">Done ✓</div>
+      </div><div class="stage " onclick="cycleStage(1782994025160,'review')" title="Click to cycle status">
+        <div class="stage-icon">🔍</div>
+        <div class="stage-name">Expert Review</div>
+        <div class="stage-status ss-progress">In Progress</div>
+      </div><div class="stage " onclick="cycleStage(1782994025160,'validated')" title="Click to cycle status">
+        <div class="stage-icon">✅</div>
+        <div class="stage-name">Validated</div>
+        <div class="stage-status ss-todo">To Do</div>
+      </div><div class="stage " onclick="cycleStage(1782994025160,'rec')" title="Click to cycle status">
+        <div class="stage-icon">🎥</div>
+        <div class="stage-name">Screen Rec</div>
+        <div class="stage-status ss-na">N/A</div>
+      </div><div class="stage " onclick="cycleStage(1782994025160,'production')" title="Click to cycle status">
+        <div class="stage-icon">🎬</div>
+        <div class="stage-name">Production</div>
+        <div class="stage-status ss-todo">To Do</div>
+      </div><div class="stage " onclick="cycleStage(1782994025160,'published')" title="Click to cycle status">
+        <div class="stage-icon">🚀</div>
+        <div class="stage-name">Published</div>
+        <div class="stage-status ss-todo">To Do</div>
+      </div></div>
+
+      <div class="screen-rec-row">
+        <span>Screen recording needed:</span>
+        <label class="toggle-wrap" onclick="toggleRec(1782994025160)">
+          <div class="toggle on"></div>
+          <span style="font-weight:600;color:var(--text)">Yes</span>
+        </label>
+      </div>
+
+      <div class="due-row">
+        <div class="due-item"><span class="due-label">📝 Script due:</span><span class="due-date ">Oct 21, 2026</span></div>
+        <div class="due-item"><span class="due-label">🚀 Publish by:</span><span class="due-date ">Nov 4, 2026</span></div>
+        <div class="due-item" style="margin-left:auto"><span class="due-label">Progress:</span><span class="due-date" style="color:var(--warn)">1/6 stages</span></div>
+      </div>
+
+      
+    <div class="assets-toggle" id="tog-1782994025160" onclick="toggleDrawer(1782994025160)">
+      <span>📁 Scripts &amp; Assets<span style="color:var(--success);font-size:.7rem;margin-left:6px">Draft saved</span></span>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="assets-drawer" id="drawer-1782994025160">
+      <div class="asset-tabs">
+        <div class="asset-tab active has-content" id="tab-1782994025160-draft" onclick="switchTab(1782994025160,'draft')">✍️ AI Draft</div>
+        <div class="asset-tab" id="tab-1782994025160-validated" onclick="switchTab(1782994025160,'validated')">✅ Validated Script</div>
+        <div class="asset-tab" id="tab-1782994025160-rec" onclick="switchTab(1782994025160,'rec')">🎥 Screen Recording</div>
+      </div>
+      <div class="asset-panel active" id="panel-1782994025160-draft">
+        <div class="script-meta">AI-generated draft — paste or type below</div>
+        <textarea class="script-area" placeholder="Paste your AI-generated script here..." onblur="updateField(1782994025160,'draftScript',this.value)">🎬 AI Demo Video Script: SAP FI-CA P2P Creation Process
+🎙️ Scene 1 – Introduction
+Voiceover: "Welcome to this demo of the Partial Payment Plan, or P2P, creation process in SAP FI-CA. In this video, we’ll walk through how to create and manage a P2P request step by step."
+ 
+🎙️ Scene 2 – Accessing the Dashboard
+Voiceover: "Start by opening the Cash Collections Dashboard and navigating to the Collection Tasks section."
+"From there, select the option: Click here – Promise to Pay."
+ 
+🎙️ Scene 3 – Customer Selection
+Voiceover: "Enter the Business Partner number, which is mandatory. You can also enter the Company Code if needed."
+"Click Show to display the customer information."
+ 
+🎙️ Scene 4 – Creating a New Promise to Pay
+Voiceover: "If no P2P request exists, click Create Promise to begin a new request."
+"On the Create Promise to Pay screen, enter the following:"
+•	"The Company"
+•	"The Category and Reason — both required"
+•	"And the Co-semant Contract Account number in the selection details"
+"Then click Action Open Items to proceed."
+ 
+🎙️ Scene 5 – Layout Setup
+Voiceover: "In the P2P open items screen, switch the layout to optimize visibility."
+"Select Non FI-CA Layout from the layout dropdown and confirm."
+ 
+🎙️ Scene 6 – Selecting Invoices
+Voiceover: "Use the Reference column filter to narrow down invoices based on number range."
+"Select the Visible Rows to include all relevant invoices."
+"Then click Process Chains."
+ 
+🎙️ Scene 7 – Entering P2P Details
+Voiceover: "Now, enter the payment plan details carefully:"
+•	"The First Payment Date — this is when the first installment is expected."
+•	"The Payment Date Logic — typically the 29th day of each month."
+•	"The Number of Dates — which defines the number of installments."
+•	"And the Maximum Down Payment, if required."
+ 
+🎙️ Scene 8 – Saving the Request
+Voiceover: "Click Save. A unique P2P number will be generated, and a confirmation message will appear."
+ 
+🎙️ Scene 9 – Important Notes
+Voiceover: "Keep the following important points in mind:"
+•	"The P2P review period is 14 days for EHF accounting, so the setup must consider customer processing time."
+•	"Always set the due date as the expected posting or settling date when funds arrive."
+•	"Do not change the payment plan manually if a P2P already exists for the invoice."
+•	"If a previous P2P exists for the same invoice, ensure it is canceled before creating a new one."
+•	"Broken P2P plans will automatically return the system to standard processing during EHF runs."
+ 
+🎙️ Scene 10 – Closing
+Voiceover: "You have now completed the Promise to Pay process in SAP FI-CA. Thank you for watching."
+</textarea>
+      </div>
+      <div class="asset-panel" id="panel-1782994025160-validated">
+        <div class="script-meta">Expert-validated final script</div>
+        <textarea class="script-area" placeholder="Paste the validated script here after the process expert approves it..." onblur="updateField(1782994025160,'validatedScript',this.value)"></textarea>
+      </div>
+      <div class="asset-panel" id="panel-1782994025160-rec">
+        <div class="script-meta">OneDrive link to the screen recording file</div>
+        <div class="rec-link-row">
+          <input class="rec-link-input" type="url" placeholder="Paste your OneDrive share link here..." value="" onblur="updateField(1782994025160,'recLink',this.value)" id="reclink-1782994025160">
+          <a class="rec-open-btn disabled" id="recopen-1782994025160" href="#" target="_blank" rel="noopener" onclick="return openRecLink(1782994025160)">↗ Open</a>
+        </div>
+        <div class="rec-hint">Tip: in OneDrive, right-click the file → Share → Copy link, then paste it above.</div>
+      </div>
+    </div>
+
+      <div class="sprint-notes">
+        <textarea placeholder="Notes, reviewer name, extra links..." onblur="updateNotes(1782994025160,this.value)"></textarea>
+      </div>
+    </div>
+    <div class="timeline-connector"></div>
+    <div class="sprint-card st-active" id="card-1782994024300">
+      <div class="card-badge badge-active">ACTIVE</div>
+      <div class="card-top">
+        <div class="card-meta">
+          <div class="sprint-num">Sprint 5</div>
+          <div class="sprint-title" contenteditable="true" onblur="updateTitle(1782994024300,this.textContent)">How to submit a refund request?</div>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-sm btn-outline" onclick="editSprint(1782994024300)">Edit</button>
+          <button class="btn btn-sm btn-outline btn-danger" onclick="deleteSprint(1782994024300)">✕</button>
+        </div>
+      </div>
+
+      <div class="progress-bar"><div class="progress-fill" style="width:17%;background:var(--warn)"></div></div>
+      <div class="pipeline"><div class="stage " onclick="cycleStage(1782994024300,'draft')" title="Click to cycle status">
+        <div class="stage-icon">✍️</div>
+        <div class="stage-name">AI Draft</div>
+        <div class="stage-status ss-done">Done ✓</div>
+      </div><div class="stage " onclick="cycleStage(1782994024300,'review')" title="Click to cycle status">
+        <div class="stage-icon">🔍</div>
+        <div class="stage-name">Expert Review</div>
+        <div class="stage-status ss-progress">In Progress</div>
+      </div><div class="stage " onclick="cycleStage(1782994024300,'validated')" title="Click to cycle status">
+        <div class="stage-icon">✅</div>
+        <div class="stage-name">Validated</div>
+        <div class="stage-status ss-todo">To Do</div>
+      </div><div class="stage " onclick="cycleStage(1782994024300,'rec')" title="Click to cycle status">
+        <div class="stage-icon">🎥</div>
+        <div class="stage-name">Screen Rec</div>
+        <div class="stage-status ss-todo">To Do</div>
+      </div><div class="stage " onclick="cycleStage(1782994024300,'production')" title="Click to cycle status">
+        <div class="stage-icon">🎬</div>
+        <div class="stage-name">Production</div>
+        <div class="stage-status ss-todo">To Do</div>
+      </div><div class="stage " onclick="cycleStage(1782994024300,'published')" title="Click to cycle status">
+        <div class="stage-icon">🚀</div>
+        <div class="stage-name">Published</div>
+        <div class="stage-status ss-todo">To Do</div>
+      </div></div>
+
+      <div class="screen-rec-row">
+        <span>Screen recording needed:</span>
+        <label class="toggle-wrap" onclick="toggleRec(1782994024300)">
+          <div class="toggle on"></div>
+          <span style="font-weight:600;color:var(--text)">Yes</span>
+        </label>
+      </div>
+
+      <div class="due-row">
+        <div class="due-item"><span class="due-label">📝 Script due:</span><span class="due-date ">Nov 4, 2026</span></div>
+        <div class="due-item"><span class="due-label">🚀 Publish by:</span><span class="due-date ">Nov 18, 2026</span></div>
+        <div class="due-item" style="margin-left:auto"><span class="due-label">Progress:</span><span class="due-date" style="color:var(--warn)">1/6 stages</span></div>
+      </div>
+
+      
+    <div class="assets-toggle" id="tog-1782994024300" onclick="toggleDrawer(1782994024300)">
+      <span>📁 Scripts &amp; Assets</span>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="assets-drawer" id="drawer-1782994024300">
+      <div class="asset-tabs">
+        <div class="asset-tab active" id="tab-1782994024300-draft" onclick="switchTab(1782994024300,'draft')">✍️ AI Draft</div>
+        <div class="asset-tab" id="tab-1782994024300-validated" onclick="switchTab(1782994024300,'validated')">✅ Validated Script</div>
+        <div class="asset-tab" id="tab-1782994024300-rec" onclick="switchTab(1782994024300,'rec')">🎥 Screen Recording</div>
+      </div>
+      <div class="asset-panel active" id="panel-1782994024300-draft">
+        <div class="script-meta">AI-generated draft — paste or type below</div>
+        <textarea class="script-area" placeholder="Paste your AI-generated script here..." onblur="updateField(1782994024300,'draftScript',this.value)"></textarea>
+      </div>
+      <div class="asset-panel" id="panel-1782994024300-validated">
+        <div class="script-meta">Expert-validated final script</div>
+        <textarea class="script-area" placeholder="Paste the validated script here after the process expert approves it..." onblur="updateField(1782994024300,'validatedScript',this.value)"></textarea>
+      </div>
+      <div class="asset-panel" id="panel-1782994024300-rec">
+        <div class="script-meta">OneDrive link to the screen recording file</div>
+        <div class="rec-link-row">
+          <input class="rec-link-input" type="url" placeholder="Paste your OneDrive share link here..." value="" onblur="updateField(1782994024300,'recLink',this.value)" id="reclink-1782994024300">
+          <a class="rec-open-btn disabled" id="recopen-1782994024300" href="#" target="_blank" rel="noopener" onclick="return openRecLink(1782994024300)">↗ Open</a>
+        </div>
+        <div class="rec-hint">Tip: in OneDrive, right-click the file → Share → Copy link, then paste it above.</div>
+      </div>
+    </div>
+
+      <div class="sprint-notes">
+        <textarea placeholder="Notes, reviewer name, extra links..." onblur="updateNotes(1782994024300,this.value)"></textarea>
+      </div>
+    </div>
+    </div>
 </main>
 
 <!-- Modal -->
@@ -378,7 +865,7 @@
     </div>
     <div class="form-group">
       <label>Team / Project Name</label>
-      <input type="text" id="sTeamName" placeholder="e.g. L&D AI Video Team">
+      <input type="text" id="sTeamName" placeholder="e.g. L&amp;D AI Video Team">
     </div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeSettings()">Cancel</button>
@@ -391,7 +878,9 @@
 
 
 <script>
-const STORAGE_KEYS = {
+
+  (function(){ try { localStorage.setItem('ai_video_tracker_v4', "[{\"id\":1782994025804,\"title\":\"How to create an installment plan?\",\"scriptDate\":\"2026-09-09\",\"videoDate\":\"2026-09-23\",\"needsRec\":true,\"draft\":\"done\",\"review\":\"progress\",\"validated\":\"todo\",\"rec\":\"todo\",\"production\":\"todo\",\"published\":\"todo\",\"draftScript\":\"\",\"validatedScript\":\"\",\"recLink\":\"\",\"notes\":\"\"},{\"id\":1782994020882,\"title\":\"How to log a dispute case?\",\"scriptDate\":\"2026-09-23\",\"videoDate\":\"2026-10-07\",\"needsRec\":true,\"draft\":\"done\",\"review\":\"progress\",\"validated\":\"todo\",\"rec\":\"todo\",\"production\":\"todo\",\"published\":\"todo\",\"draftScript\":\"\",\"validatedScript\":\"\",\"recLink\":\"\",\"notes\":\"\"},{\"id\":1782999135765,\"title\":\"Termination: How to identify if an invoice is valid?\",\"scriptDate\":\"2026-10-07\",\"videoDate\":\"2026-10-21\",\"needsRec\":true,\"draft\":\"done\",\"review\":\"progress\",\"validated\":\"todo\",\"rec\":\"todo\",\"production\":\"todo\",\"published\":\"todo\",\"draftScript\":\"\",\"validatedScript\":\"\",\"recLink\":\"\",\"notes\":\"\"},{\"id\":1782994025160,\"title\":\"How to log a promise-to-pay?\",\"scriptDate\":\"2026-10-21\",\"videoDate\":\"2026-11-04\",\"needsRec\":true,\"draft\":\"done\",\"review\":\"progress\",\"validated\":\"todo\",\"rec\":\"na\",\"production\":\"todo\",\"published\":\"todo\",\"draftScript\":\"🎬 AI Demo Video Script: SAP FI-CA P2P Creation Process\\n🎙️ Scene 1 – Introduction\\nVoiceover: \\\"Welcome to this demo of the Partial Payment Plan, or P2P, creation process in SAP FI-CA. In this video, we’ll walk through how to create and manage a P2P request step by step.\\\"\\n \\n🎙️ Scene 2 – Accessing the Dashboard\\nVoiceover: \\\"Start by opening the Cash Collections Dashboard and navigating to the Collection Tasks section.\\\"\\n\\\"From there, select the option: Click here – Promise to Pay.\\\"\\n \\n🎙️ Scene 3 – Customer Selection\\nVoiceover: \\\"Enter the Business Partner number, which is mandatory. You can also enter the Company Code if needed.\\\"\\n\\\"Click Show to display the customer information.\\\"\\n \\n🎙️ Scene 4 – Creating a New Promise to Pay\\nVoiceover: \\\"If no P2P request exists, click Create Promise to begin a new request.\\\"\\n\\\"On the Create Promise to Pay screen, enter the following:\\\"\\n•\\t\\\"The Company\\\"\\n•\\t\\\"The Category and Reason — both required\\\"\\n•\\t\\\"And the Co-semant Contract Account number in the selection details\\\"\\n\\\"Then click Action Open Items to proceed.\\\"\\n \\n🎙️ Scene 5 – Layout Setup\\nVoiceover: \\\"In the P2P open items screen, switch the layout to optimize visibility.\\\"\\n\\\"Select Non FI-CA Layout from the layout dropdown and confirm.\\\"\\n \\n🎙️ Scene 6 – Selecting Invoices\\nVoiceover: \\\"Use the Reference column filter to narrow down invoices based on number range.\\\"\\n\\\"Select the Visible Rows to include all relevant invoices.\\\"\\n\\\"Then click Process Chains.\\\"\\n \\n🎙️ Scene 7 – Entering P2P Details\\nVoiceover: \\\"Now, enter the payment plan details carefully:\\\"\\n•\\t\\\"The First Payment Date — this is when the first installment is expected.\\\"\\n•\\t\\\"The Payment Date Logic — typically the 29th day of each month.\\\"\\n•\\t\\\"The Number of Dates — which defines the number of installments.\\\"\\n•\\t\\\"And the Maximum Down Payment, if required.\\\"\\n \\n🎙️ Scene 8 – Saving the Request\\nVoiceover: \\\"Click Save. A unique P2P number will be generated, and a confirmation message will appear.\\\"\\n \\n🎙️ Scene 9 – Important Notes\\nVoiceover: \\\"Keep the following important points in mind:\\\"\\n•\\t\\\"The P2P review period is 14 days for EHF accounting, so the setup must consider customer processing time.\\\"\\n•\\t\\\"Always set the due date as the expected posting or settling date when funds arrive.\\\"\\n•\\t\\\"Do not change the payment plan manually if a P2P already exists for the invoice.\\\"\\n•\\t\\\"If a previous P2P exists for the same invoice, ensure it is canceled before creating a new one.\\\"\\n•\\t\\\"Broken P2P plans will automatically return the system to standard processing during EHF runs.\\\"\\n \\n🎙️ Scene 10 – Closing\\nVoiceover: \\\"You have now completed the Promise to Pay process in SAP FI-CA. Thank you for watching.\\\"\\n\",\"validatedScript\":\"\",\"recLink\":\"\",\"notes\":\"\"},{\"id\":1782994024300,\"title\":\"How to submit a refund request?\",\"scriptDate\":\"2026-11-04\",\"videoDate\":\"2026-11-18\",\"needsRec\":true,\"draft\":\"done\",\"review\":\"progress\",\"validated\":\"todo\",\"rec\":\"todo\",\"production\":\"todo\",\"published\":\"todo\",\"draftScript\":\"\",\"validatedScript\":\"\",\"recLink\":\"\",\"notes\":\"\"}]"); } catch(e){} })();
+  const STORAGE_KEYS = {
   ai:      'ai_video_tracker_v4',
   invoice: 'ai_video_tracker_invoice_v1',
 };
@@ -1015,5 +1504,6 @@ loadSettings();
 load();
 render();
 </script>
-</body>
-</html>
+
+
+</body></html>
